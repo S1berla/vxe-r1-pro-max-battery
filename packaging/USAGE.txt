@@ -1,0 +1,41 @@
+VXE R1 Pro Max Battery v0.1.0
+Windows x64
+
+运行前确认：
+1. 2.4G 接收器已插入电脑。
+2. 鼠标处于 2.4G 模式并保持唤醒。
+3. 建议退出 ATK HUB 客户端，减少 HID 争用。
+4. 不要卸载接收器或 HID 驱动。
+
+启动托盘：
+  MouseBatteryTray.exe
+
+程序启动后不会显示主窗口，只在 Windows 通知区域显示鼠标轮廓图标。
+绿色填充高度表示电量比例。悬停可查看精确百分比和电压，双击可打开详情。
+
+右键菜单：
+  - 立即刷新
+  - 开机启动
+  - 退出
+
+首次运行默认注册当前用户开机启动，可在右键菜单中关闭。
+
+命令行读取：
+  MouseBatteryConsole.exe
+  MouseBatteryConsole.exe --watch --interval 60
+  MouseBatteryConsole.exe --json
+
+无界面自检：
+  MouseBatteryTray.exe --test
+
+运行自检前请先退出已经运行的托盘程序。
+
+日志位置：
+  %LOCALAPPDATA%\VxeMouseBatteryTray\app.log
+
+如果读取超时：
+  1. 关闭 ATK HUB 客户端。
+  2. 移动鼠标唤醒。
+  3. 在托盘中点击“立即刷新”。
+
+读取失败不会显示成 0%，程序会保留上一次有效读数并标记为未更新。

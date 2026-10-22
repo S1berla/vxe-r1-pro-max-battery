@@ -14,7 +14,8 @@ $consoleOutput = Join-Path $outputDirectory 'MouseBatteryConsole.exe'
 $consoleSources = @(
     (Join-Path $root 'src\MouseBattery\HidNative.cs'),
     (Join-Path $root 'src\MouseBattery\VxeBatteryReader.cs'),
-    (Join-Path $root 'src\MouseBattery.Console\Program.cs')
+    (Join-Path $root 'src\MouseBattery.Console\Program.cs'),
+    (Join-Path $root 'src\MouseBattery.Console\AssemblyInfo.cs')
 )
 
 & $compiler `
@@ -39,7 +40,8 @@ $traySources = @(
     (Join-Path $root 'src\MouseBattery.Tray\AutostartManager.cs'),
     (Join-Path $root 'src\MouseBattery.Tray\BatteryIconRenderer.cs'),
     (Join-Path $root 'src\MouseBattery.Tray\DetailsForm.cs'),
-    (Join-Path $root 'src\MouseBattery.Tray\TrayApplicationContext.cs')
+    (Join-Path $root 'src\MouseBattery.Tray\TrayApplicationContext.cs'),
+    (Join-Path $root 'src\MouseBattery.Tray\AssemblyInfo.cs')
 )
 
 & $compiler `

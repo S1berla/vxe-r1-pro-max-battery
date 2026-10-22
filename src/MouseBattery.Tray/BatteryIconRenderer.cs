@@ -1,13 +1,17 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Runtime.InteropServices;
 
 namespace MouseBattery.Tray
 {
     internal static class BatteryIconRenderer
     {
+        private static readonly Color HealthyColor =
+            Color.FromArgb(52, 199, 89);
+        private static readonly Color UnknownColor =
+            Color.FromArgb(142, 142, 147);
+
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool DestroyIcon(IntPtr iconHandle);
@@ -16,51 +20,70 @@ namespace MouseBattery.Tray
             MouseBatteryReading reading,
             bool stale)
         {
-            Color color = GetColor(reading, stale);
-            string label = GetLabel(reading);
+            int power = GetPower(reading);
+            Color fillColor = stale || reading == null
+                ? UnknownColor
+                : HealthyColor;
 
             using (var bitmap = new Bitmap(32, 32))
             using (Graphics graphics = Graphics.FromImage(bitmap))
             {
                 graphics.Clear(Color.Transparent);
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.TextRenderingHint =
-                    TextRenderingHint.ClearTypeGridFit;
 
-                using (var bodyPath = CreateRoundedRectangle(
-                    new Rectangle(2, 7, 24, 19),
-                    4))
-                using (var fillBrush = new SolidBrush(
-                    Color.FromArgb(215, color)))
-                using (var borderPen = new Pen(color, 2.0f))
+                RectangleF bodyRectangle = new RectangleF(7, 2, 18, 28);
+                using (GraphicsPath bodyPath = CreateRoundedRectangle(
+                    bodyRectangle,
+                    9))
+                using (var emptyBrush = new SolidBrush(
+                    Color.FromArgb(95, 30, 30, 30)))
+                using (var fillBrush = new SolidBrush(fillColor))
                 {
-                    graphics.FillPath(fillBrush, bodyPath);
-                    graphics.DrawPath(borderPen, bodyPath);
+                    graphics.FillPath(emptyBrush, bodyPath);
 
-                    using (var capBrush = new SolidBrush(color))
+                    if (power > 0)
                     {
-                        graphics.FillRectangle(capBrush, 27, 12, 3, 9);
+                        float fillHeight =
+                            bodyRectangle.Height * power / 100.0f;
+
+                        graphics.SetClip(bodyPath);
+                        graphics.FillRectangle(
+                            fillBrush,
+                            bodyRectangle.X,
+                            bodyRectangle.Bottom - fillHeight,
+                            bodyRectangle.Width,
+                            fillHeight);
+                        graphics.ResetClip();
+                    }
+
+                    using (var outerPen = new Pen(
+                        Color.FromArgb(180, 0, 0, 0),
+                        4.0f))
+                    using (var outlinePen = new Pen(
+                        stale || reading == null
+                            ? UnknownColor
+                            : Color.FromArgb(245, 255, 255, 255),
+                        2.0f))
+                    {
+                        graphics.DrawPath(outerPen, bodyPath);
+                        graphics.DrawPath(outlinePen, bodyPath);
                     }
                 }
 
-                float fontSize = label.Length >= 3 ? 8.5f : 11.0f;
-                using (var font = new Font(
-                    "Segoe UI",
-                    fontSize,
-                    FontStyle.Bold,
-                    GraphicsUnit.Pixel))
-                using (var textBrush = new SolidBrush(Color.White))
-                using (var textFormat = new StringFormat())
+                using (GraphicsPath wheelPath = CreateRoundedRectangle(
+                    new RectangleF(14, 6, 4, 8),
+                    2))
+                using (var wheelBrush = new SolidBrush(
+                    Color.FromArgb(215, 255, 255, 255)))
                 {
-                    textFormat.Alignment = StringAlignment.Center;
-                    textFormat.LineAlignment = StringAlignment.Center;
+                    graphics.FillPath(wheelBrush, wheelPath);
+                }
 
-                    graphics.DrawString(
-                        label,
-                        font,
-                        textBrush,
-                        new RectangleF(2, 8, 24, 17),
-                        textFormat);
+                using (var centerLinePen = new Pen(
+                    Color.FromArgb(130, 255, 255, 255),
+                    1.0f))
+                {
+                    graphics.DrawLine(centerLinePen, 16, 16, 16, 27);
                 }
 
                 IntPtr handle = bitmap.GetHicon();
@@ -78,61 +101,30 @@ namespace MouseBattery.Tray
             }
         }
 
-        private static Color GetColor(
-            MouseBatteryReading reading,
-            bool stale)
-        {
-            if (stale || reading == null)
-            {
-                return Color.FromArgb(142, 142, 147);
-            }
-
-            if (reading.IsCharging)
-            {
-                return Color.FromArgb(47, 128, 237);
-            }
-
-            if (reading.Power < 20)
-            {
-                return Color.FromArgb(255, 59, 48);
-            }
-
-            if (reading.Power < 60)
-            {
-                return Color.FromArgb(255, 176, 32);
-            }
-
-            return Color.FromArgb(52, 199, 89);
-        }
-
-        private static string GetLabel(MouseBatteryReading reading)
+        private static int GetPower(MouseBatteryReading reading)
         {
             if (reading == null)
             {
-                return "?";
+                return 0;
             }
 
-            int power = reading.Power;
-            if (power < 0)
-            {
-                power = 0;
-            }
-            if (power > 100)
-            {
-                power = 100;
-            }
-
-            return power.ToString();
+            return Math.Max(0, Math.Min(100, reading.Power));
         }
 
         private static GraphicsPath CreateRoundedRectangle(
-            Rectangle rectangle,
-            int radius)
+            RectangleF rectangle,
+            float radius)
         {
-            int diameter = radius * 2;
+            float diameter = radius * 2.0f;
             var path = new GraphicsPath();
 
-            path.AddArc(rectangle.X, rectangle.Y, diameter, diameter, 180, 90);
+            path.AddArc(
+                rectangle.X,
+                rectangle.Y,
+                diameter,
+                diameter,
+                180,
+                90);
             path.AddArc(
                 rectangle.Right - diameter,
                 rectangle.Y,
@@ -160,4 +152,3 @@ namespace MouseBattery.Tray
         }
     }
 }
-

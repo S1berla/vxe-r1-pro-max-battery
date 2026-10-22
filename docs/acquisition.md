@@ -1,6 +1,6 @@
 # C# 电量采集程序
 
-> 以下命令均假设当前终端已切换到项目根目录，PowerShell 7 或 Windows PowerShell 均可。
+> 以下命令均假设当前终端已切换到项目根目录，并使用 PowerShell 7（`pwsh`）。
 
 ## 目标
 
@@ -73,9 +73,6 @@ usage 2
 
 ```powershell
 pwsh -File .\build.ps1
-
-# 或使用 Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\build.ps1
 ```
 
 输出：
@@ -136,5 +133,6 @@ src\MouseBattery\VxeBatteryReader.cs
 
 - 鼠标休眠时，在线状态仍可能为真，但电量查询会超时。
 - 官方 ATK HUB 可能占用 HID 输入句柄。
+- 可以退出 ATK HUB 客户端以减少 HID 争用；不要卸载接收器或 HID 驱动。
 - 托盘层应保留上一次有效读数，并在超时时显示“设备休眠/未更新”。
 

@@ -1,5 +1,6 @@
-# 构建产物（发布到 GitHub Releases，不提交）
+# 构建产物
 build/
+dist/
 bin/
 obj/
 *.exe
@@ -11,6 +12,9 @@ vendor/
 
 # 日志
 *.log
+
+# 本地交接文件
+HANDOFF.md
 
 # 抓包文件
 capture-*.pcap

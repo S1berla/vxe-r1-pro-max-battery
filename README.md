@@ -19,7 +19,7 @@
 
 ## 快速运行
 
-环境要求：Windows 10/11 x64。C# 部分使用系统自带的 .NET Framework 4.x 编译器，无需安装额外 SDK。
+环境要求：Windows 10/11 x64、PowerShell 7。C# 部分使用系统自带的 .NET Framework 4.x 编译器，无需安装额外 SDK。
 
 克隆并构建：
 
@@ -27,14 +27,18 @@
 git clone https://github.com/S1berla/vxe-r1-pro-max-battery.git
 cd vxe-r1-pro-max-battery
 
-# PowerShell 7
 pwsh -File .\build.ps1
-
-# 或者使用系统自带的 Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\build.ps1
 ```
 
-也可以直接从 Releases 下载预编译的 exe，跳过构建步骤。
+当前仓库暂未发布预编译包，请按上述步骤在本地构建。
+
+生成 `v0.1.0` 发布包：
+
+```powershell
+pwsh -File .\package.ps1 -Version 0.1.0
+```
+
+输出位于 `dist\`，包含 ZIP、SHA-256、使用说明和发布说明。
 
 启动托盘：
 
@@ -48,7 +52,7 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1
 - 开机启动开关
 - 退出
 
-双击托盘图标会打开电池详情窗口。图标内部显示百分比，悬停显示电量、充电状态和电压。
+双击托盘图标会打开电池详情窗口。托盘图标使用鼠标轮廓，绿色填充高度随电量变化，不显示数字；悬停时仍可查看精确百分比、充电状态和电压。
 
 控制台单次读取：
 
@@ -70,6 +74,12 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1
 
 如果读取超时，先关闭 ATK HUB，再移动鼠标保持唤醒后重试。官方驱动与诊断脚本可能争用同一个 HID 输入句柄。
 
+### ATK HUB 使用建议
+
+托盘程序直接通过 Windows HID 读取接收器，不依赖 ATK HUB 客户端。关闭 ATK HUB 客户端不会影响电量读取，通常还能减少 HID 输入句柄争用，因此建议日常使用时保持 ATK HUB 关闭或退出。
+
+这里关闭的是 ATK HUB 客户端，不是卸载 USB 接收器或 HID 驱动。接收器仍需插在电脑上，鼠标需要处于 2.4G 模式并保持唤醒。
+
 ### Node.js 诊断脚本（可选）
 
 `scripts/` 下的协议诊断脚本需要 Node.js 18+，并需要先安装依赖：
@@ -88,7 +98,10 @@ node scripts/probe-paths.js    # 或 npm run probe
 ├─ LICENSE
 ├─ package.json
 ├─ build.ps1                # 使用系统 C# 编译器构建控制台与托盘程序
-├─ build/                   # 构建产物，不提交；发布在 GitHub Releases
+├─ package.ps1              # 生成 Windows x64 发布目录、ZIP 和校验和
+├─ build/                   # 构建产物，不提交
+├─ dist/                    # 本地发布包，不提交，上传到 GitHub Releases
+├─ packaging/               # 发布使用说明和版本说明模板
 ├─ src/
 │  ├─ MouseBattery/         # 可复用的 HID 与电量采集层
 │  ├─ MouseBattery.Console/ # 控制台入口
