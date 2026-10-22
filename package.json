@@ -1,0 +1,22 @@
+{
+  "name": "vxe-r1-pro-max-battery",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read VXE Dragonfly R1 Pro Max battery over its 2.4G HID receiver",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/S1berla/vxe-r1-pro-max-battery.git"
+  },
+  "scripts": {
+    "read:battery": "node scripts/read-battery.js",
+    "probe": "node scripts/probe-paths.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "node-hid": "^3.4.0"
+  }
+}
+

@@ -1,0 +1,21 @@
+# 构建产物（发布到 GitHub Releases，不提交）
+build/
+bin/
+obj/
+*.exe
+*.pdb
+
+# Node.js 依赖
+node_modules/
+vendor/
+
+# 日志
+*.log
+
+# 抓包文件
+capture-*.pcap
+capture-*.pcapng
+
+# 操作系统
+.DS_Store
+Thumbs.db
